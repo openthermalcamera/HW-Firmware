@@ -1,5 +1,6 @@
 #include "implementation.h"
 #include "usbd_cdc_if.h"
+#include "cobs.h"
 
 void main_loop(){
 
@@ -30,7 +31,8 @@ void main_loop(){
 void execute_command(cmd_struct command){
 	rsp_struct response;
 	response.data = 0;
-	uint8_t* pointer_to_tx_buffer_offset = CDC_GetTransmitBuffer() + 4;
+	//offset by 4 bytes (response header) +1B initial COBS encode overhead
+	uint8_t* pointer_to_tx_buffer_offset = CDC_GetTransmitBuffer() + RESPONSE_STRUCT_SIZE + 1;
 
 	while(CDC_Transmit_Complete() != USBD_OK){
 		//wait for usb to transfer...
@@ -126,14 +128,27 @@ void execute_command(cmd_struct command){
 		break;
 	}	
 
-
-	while(CDC_Transmit_Complete() != USBD_OK){
-		//wait for usb to transfer...
-	}
-	write_response_to_buffer(response, CDC_GetTransmitBuffer());
+	//+1B COBS OVERHEAD initial byte
+	write_response_to_buffer(response, CDC_GetTransmitBuffer() + 1);
 	if(response.data != 0) {
 		free(response.data);
 	}
 
-	CDC_Transmit_FS(CDC_GetTransmitBuffer(), RESPONSE_STRUCT_SIZE + response.dataLength);
+	//non-encoded data sits in transmit buffer with first byte free for COBS encoding overhead byte
+	//lets begin with COBS encoding
+	cobs_encode_result encode_result = cobs_encode(CDC_GetTransmitBuffer(), CDC_GetTransmitBufferSize(), CDC_GetTransmitBuffer() + 1, RESPONSE_STRUCT_SIZE + response.dataLength);
+
+	if(encode_result.status == COBS_ENCODE_OK){
+		//successfully encoded, finally add a message delimiter (0x00) at the end of COBS data
+		CDC_GetTransmitBuffer()[encode_result.out_len] = 0x00;
+
+		//lets transmit this message. COBS data (out_len) + 1B
+		CDC_Transmit_FS(CDC_GetTransmitBuffer(), encode_result.out_len + 1);
+	}
+
+
+	while(CDC_Transmit_Complete() != USBD_OK){
+		//wait for usb to transfer...
+	}
+
 }

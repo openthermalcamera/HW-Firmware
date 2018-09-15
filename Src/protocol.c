@@ -1,9 +1,7 @@
 #include "protocol.h"
 #include "usbd_cdc_if.h"
+#include "cobs.h"
 
-static int serial_get_available_bytes(){
-	return CDC_Available();
-}
 
 static uint8_t serial_get_byte(){
 	return CDC_Read();
@@ -28,69 +26,62 @@ static void write_data_length(uint16_t dataLength){
 }
 
 
-static uint16_t read_data_length(){
-	uint16_t r = 0;
-
-#if __BIG_ENDIAN__
-	for(int i = 0; i<2; i++){
-		((uint8_t*) &r)[i] = serial_get_byte();
-	}
-#else
-	for(int i = 1; i >= 0; i--){
-		((uint8_t*) &r)[i] = serial_get_byte();
-	}
-#endif
-
-	return r;
-}
-
-static uint8_t peek_cmd_code(){
-	return CDC_Peak(0);
-}
-
-static uint16_t peek_data_length(){
-	uint16_t r = 0;
-
-#if __BIG_ENDIAN__
-	((uint8_t*) &r)[0] = CDC_Peak(1);
-	((uint8_t*) &r)[1] = CDC_Peak(2);
-#else
-	((uint8_t*) &r)[0] = CDC_Peak(2);
-	((uint8_t*) &r)[1] = CDC_Peak(1);
-#endif
-
-	return r;
-
-}
-
 
 cmd_struct parse_command(){
 
 	cmd_struct command;
 
-	//if enough data to start parsing
-	if(serial_get_available_bytes() >= 3){
-		command.commandCode = peek_cmd_code();
-		command.dataLength = peek_data_length();
-		if(command.dataLength <= MAX_CMD_DATA_LENGTH && CDC_Available() + 3 >= command.dataLength){
-			//read
-			command.commandCode = serial_get_byte();
-			command.dataLength = read_data_length();
+	//default set as no command
+	command.commandCode = CMD_NO_COMMAND;
+	command.dataLength = 0;
 
-			//seq
-			for(int i = 0; i<command.dataLength; i++){
-				command.data[i] = serial_get_byte();
+	if(CDC_Available() <= 0) return command;
+
+	//check if whole message arrived -> 0x00, {cmd}, 0x00
+	int cmd_length = -1;
+	uint8_t cobs_encoded_buffer[MAX_CMD_DATA_LENGTH];
+
+	for(int i = 0; i < CDC_Available(); i++){
+		uint8_t peak_byte = CDC_Peak(i);
+		if(peak_byte == 0x00){
+			cmd_length = i;
+		}
+	}
+
+	if(cmd_length > 0){
+
+		for(int i = 0; i<cmd_length; i++){
+			cobs_encoded_buffer[i] = CDC_Read();
+		}
+		//discard the message end delimiter (0x00)
+		CDC_Read();
+
+		//create buffer of suitable size for decoded message
+		int cmd_buffer_size = COBS_DECODE_DST_BUF_LEN_MAX(cmd_length);
+		uint8_t* cmd = malloc(cmd_buffer_size);
+
+		//the cobs encoded message is now stored in buffer, decode the message
+		cobs_decode_result decode_result = cobs_decode(cmd, cmd_buffer_size, cobs_encoded_buffer, cmd_length);
+
+		//check if result was successful
+		if(decode_result.status == COBS_DECODE_OK){
+			//start parsing the cmd
+
+			//first check if command is complete (amount of data and data length match)
+			if(decode_result.out_len >= CMD_HEADER_SIZE && decode_result.out_len <= MAX_CMD_DATA_LENGTH + CMD_HEADER_SIZE) {
+				command.dataLength = (((uint16_t)cmd[1]) << 8) | ((uint16_t) cmd[2]);
+				if(command.dataLength + CMD_HEADER_SIZE == decode_result.out_len){
+					//command is complete, start parsing fully
+					command.commandCode = cmd[0];
+					//copy data to command struct
+					memcpy(command.data, cmd + CMD_HEADER_SIZE, command.dataLength);
+
+				}
+
 			}
-		}else{
-			//not enough data
-			command.commandCode = 255;
-			return command;
+
 		}
 
-	}else{
-		//not enough data
-		command.commandCode = 255;
-		return command;
 	}
 
 

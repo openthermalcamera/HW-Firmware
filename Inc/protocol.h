@@ -6,8 +6,10 @@
 
 #define MAX_CMD_DATA_LENGTH 10
 
+#define CMD_HEADER_SIZE 3
+
 //commandCode
-#define CMD_NO_COMMAND = 0xFF;
+#define CMD_NO_COMMAND 0xFF
 
 #define CMD_PING 				0x00
 #define CMD_DUMP_EE 			0x01

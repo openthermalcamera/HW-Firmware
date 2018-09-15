@@ -366,6 +366,10 @@ uint8_t* CDC_GetTransmitBuffer(){
 	return UserTxBufferFS;
 }
 
+int CDC_GetTransmitBufferSize(){
+	return APP_TX_DATA_SIZE;
+}
+
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 /**

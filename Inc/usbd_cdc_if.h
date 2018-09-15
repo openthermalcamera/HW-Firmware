@@ -139,6 +139,8 @@ int CDC_Available();
 uint8_t CDC_Read();
 uint8_t CDC_Peak(int pos);
 uint8_t CDC_Transmit_Complete();
+int CDC_GetTransmitBufferSize();
+
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**
