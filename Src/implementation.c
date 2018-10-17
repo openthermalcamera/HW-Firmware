@@ -2,7 +2,13 @@
 #include "usbd_cdc_if.h"
 #include "cobs.h"
 
+
+//globals
+//auto send var
+uint8_t auto_frame_data_sending = 0;
+
 void main_loop(){
+
 
 	//main loop, never break out
 	while(1){
@@ -12,14 +18,15 @@ void main_loop(){
 			execute_command(cmd);
 		}
 
-		/*TODO
-
-		if(MLX90640_IsFrameDataAvailable()){
-
+		if(auto_frame_data_sending == 0x01){
+			//if new frame available, send it out immediately
+			if(MLX90640_IsFrameDataAvailable()){
+				cmd_struct fake_get_frame_data_cmd;
+				fake_get_frame_data_cmd.commandCode = CMD_GET_FRAME_DATA;
+				fake_get_frame_data_cmd.dataLength = 0;
+				execute_command(fake_get_frame_data_cmd);
+			}
 		}
-		*/
-
-
 
 	}
 
@@ -126,6 +133,17 @@ void execute_command(cmd_struct command){
 			response.dataCode = MLX90640_GetCurMode(MLX90640_SLAVE_ADDRESS);
 			response.data[0] = response.dataCode;
 		break;
+
+		case CMD_SET_AUTO_FRAME_DATA_SENDING:
+			response.responseCode = RSP_SET_AUTO_FRAME_DATA_SENDING;
+			response.dataLength = 1;
+			response.data = malloc(1);
+			response.dataCode = 0;
+			response.data[0] = auto_frame_data_sending;
+
+			auto_frame_data_sending = command.data[0];
+		break;
+
 	}	
 
 	//+1B COBS OVERHEAD initial byte

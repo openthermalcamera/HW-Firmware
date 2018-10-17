@@ -20,7 +20,7 @@
 #define CMD_GET_REFRESH_RATE 	0x06
 #define CMD_SET_MODE 			0x07
 #define CMD_GET_CUR_MODE 		0x08
-
+#define CMD_SET_AUTO_FRAME_DATA_SENDING	0x09
 
 #define COMMAND_STRUCT_SIZE 3
 typedef struct {
@@ -40,6 +40,7 @@ typedef struct {
 #define RSP_GET_REFRESH_RATE 	0x06
 #define RSP_SET_MODE 			0x07
 #define RSP_GET_CUR_MODE 		0x08
+#define RSP_SET_AUTO_FRAME_DATA_SENDING 0x09
 
 //dataCode
 #define CODE_OK 						0
