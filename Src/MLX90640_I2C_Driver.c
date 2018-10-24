@@ -26,10 +26,12 @@ void MLX90640_I2CInit()
 int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data)
 {
 
+	uint8_t* bp = (uint8_t*) data;
+
     int ack = 0;                               
     int cnt = 0;
     
-    ack = HAL_I2C_Mem_Read(&hi2c1, (slaveAddr<<1), startAddress, I2C_MEMADD_SIZE_16BIT, (uint8_t*) data, nMemAddressRead*2, 500);
+    ack = HAL_I2C_Mem_Read(&hi2c1, (slaveAddr<<1), startAddress, I2C_MEMADD_SIZE_16BIT, bp, nMemAddressRead*2, 500);
 
     if (ack != HAL_OK)
     {
@@ -40,9 +42,10 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
 
     //flip if byte order is LITTLE ENDIAN
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-    for(cnt=0; cnt < nMemAddressRead; cnt++) {
-        uint16_t lower_tmp = data[cnt] & 0x00FF;
-        data[cnt] = (data[cnt] >> 8) | (lower_tmp << 8);
+    for(cnt=0; cnt < nMemAddressRead*2; cnt+=2) {
+    	uint8_t tmpbytelsb = bp[cnt+1];
+    	bp[cnt+1] = bp[cnt];
+    	bp[cnt] = tmpbytelsb;
     }
 #endif
 
