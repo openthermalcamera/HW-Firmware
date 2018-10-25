@@ -72,7 +72,7 @@ void execute_command(cmd_struct command){
 			response.responseCode = RSP_GET_FRAME_DATA;
 			response.data = 0;
 			response.dataCode = MLX90640_GetFrameData(MLX90640_SLAVE_ADDRESS, (uint16_t*) pointer_to_tx_buffer_offset);
-			response.dataLength = 834*2 ;
+			response.dataLength = 834*2;
 
 			//swap to BIG ENDIAN
 			for(int i = 0; i< 834*2; i+=2){
@@ -154,6 +154,7 @@ void execute_command(cmd_struct command){
 
 	//non-encoded data sits in transmit buffer with first byte free for COBS encoding overhead byte
 	//lets begin with COBS encoding
+	//TODO cobs encoding with same source and destination does not always work, investigate further...
 	cobs_encode_result encode_result = cobs_encode(CDC_GetTransmitBuffer(), CDC_GetTransmitBufferSize(), CDC_GetTransmitBuffer() + 1, RESPONSE_STRUCT_SIZE + response.dataLength);
 
 	if(encode_result.status == COBS_ENCODE_OK){
