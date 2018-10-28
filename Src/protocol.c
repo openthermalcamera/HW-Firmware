@@ -2,31 +2,6 @@
 #include "usbd_cdc_if.h"
 #include "cobs.h"
 
-
-static uint8_t serial_get_byte(){
-	return CDC_Read();
-}
-
-static void serial_write_byte(){
-
-}
-
-static void write_data_length(uint16_t dataLength){
-
-#if __BIG_ENDIAN__
-	for(int i = 0; i<2; i++){
-		serial_write_byte( ((uint8_t*) &dataLength)[i] );
-	}
-#else
-	for(int i = 1; i >= 0; i--){
-		serial_write_byte( ((uint8_t*) &dataLength)[i] );
-	}
-#endif
-
-}
-
-
-
 cmd_struct parse_command(){
 
 	cmd_struct command;
@@ -37,7 +12,7 @@ cmd_struct parse_command(){
 
 	if(CDC_Available() <= 0) return command;
 
-	//check if whole message arrived -> 0x00, {cmd}, 0x00
+	//check if whole message arrived -> {cmd}, 0x00
 	int cmd_length = -1;
 	uint8_t cobs_encoded_buffer[MAX_CMD_DATA_LENGTH];
 
@@ -58,7 +33,7 @@ cmd_struct parse_command(){
 
 		//create buffer of suitable size for decoded message
 		int cmd_buffer_size = COBS_DECODE_DST_BUF_LEN_MAX(cmd_length);
-		uint8_t* cmd = malloc(cmd_buffer_size);
+		uint8_t cmd[cmd_buffer_size];
 
 		//the cobs encoded message is now stored in buffer, decode the message
 		cobs_decode_result decode_result = cobs_decode(cmd, cmd_buffer_size, cobs_encoded_buffer, cmd_length);
@@ -106,16 +81,3 @@ void write_response_to_buffer(rsp_struct rsp, uint8_t* buf){
 	}
 }
 
-void send_response(rsp_struct response){
-
-
-	serial_write_byte(response.responseCode);
-	serial_write_byte(response.dataCode);
-	write_data_length(response.dataLength);
-
-	//seq write data
-	for(int i = 0; i<response.dataLength; i++){
-		serial_write_byte(response.data[i]);
-	}
-
-}

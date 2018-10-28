@@ -58,10 +58,7 @@ typedef struct {
 } rsp_struct;
 
 
-
-
 cmd_struct parse_command();
-void send_response(rsp_struct response);
 void write_response_to_buffer(rsp_struct rsp, uint8_t* buf);
 
 
