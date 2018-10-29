@@ -21,7 +21,12 @@
   
 int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData)
 {
-     return MLX90640_I2CRead(slaveAddr, 0x2400, 832, eeData);
+	MLX90640_I2CFreqSet(I2C_HZ_400k);
+
+    return MLX90640_I2CRead(slaveAddr, 0x2400, 832, eeData);
+
+    MLX90640_I2CFreqSet(I2C_HZ_1M);
+
 }
 
 int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
@@ -32,6 +37,7 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
     int error = 1;
     uint8_t cnt = 0;
     
+
     dataReady = 0;
     while(dataReady == 0)
     {

@@ -53,10 +53,23 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     return 0;   
 } 
 
-void MLX90640_I2CFreqSet(int freq)
+//enum freq: 0 = 400khz, 1=1mhz
+void MLX90640_I2CFreqSet(I2C_Frequency f)
 {
-	//TODO
-	//add this functionality if needed
+
+	//check if instance is not in use with 100ms
+	long curTick = HAL_GetTick();
+	while(HAL_GetTick() - curTick <= 100){
+		if(hi2c1.State == HAL_I2C_STATE_READY){
+			if(f == I2C_HZ_400k){
+				hi2c1.Instance->TIMINGR = 0x00201953 & 0xF0FFFFFFU;
+			}else if(f == I2C_HZ_1M){
+				hi2c1.Instance->TIMINGR = 0x00200B19 & 0xF0FFFFFFU;
+			}
+			break;
+		}
+	}
+
 
 }
 
