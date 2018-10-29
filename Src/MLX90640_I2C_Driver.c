@@ -57,6 +57,7 @@ void MLX90640_I2CFreqSet(int freq)
 {
 	//TODO
 	//add this functionality if needed
+
 }
 
 int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
