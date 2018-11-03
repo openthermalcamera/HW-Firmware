@@ -11,6 +11,7 @@
 //commandCode
 #define CMD_NO_COMMAND 0xFF
 
+//now is GetFirmwareVersion
 #define CMD_PING 				0x00
 #define CMD_DUMP_EE 			0x01
 #define CMD_GET_FRAME_DATA 		0x02
@@ -21,6 +22,8 @@
 #define CMD_SET_MODE 			0x07
 #define CMD_GET_CUR_MODE 		0x08
 #define CMD_SET_AUTO_FRAME_DATA_SENDING	0x09
+#define CMD_GET_FIRMWARE_VERSION 0x0A
+
 
 #define COMMAND_STRUCT_SIZE 3
 typedef struct {
@@ -41,6 +44,7 @@ typedef struct {
 #define RSP_SET_MODE 			0x07
 #define RSP_GET_CUR_MODE 		0x08
 #define RSP_SET_AUTO_FRAME_DATA_SENDING 0x09
+#define RSP_GET_FIRMWARE_VERSION 0x0A
 
 //dataCode
 #define CODE_OK 						0

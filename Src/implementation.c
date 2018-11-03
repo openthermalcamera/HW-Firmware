@@ -2,6 +2,7 @@
 #include "usbd_cdc_if.h"
 #include "cobs.h"
 
+#include "Version.h"
 
 //globals
 //auto send var
@@ -147,6 +148,18 @@ void execute_command(cmd_struct command){
 			auto_frame_data_sending = command.data[0];
 		break;
 
+		case CMD_GET_FIRMWARE_VERSION :
+			response.responseCode = RSP_GET_FIRMWARE_VERSION;
+			response.dataLength = sizeof(struct FirmwareVersion);
+			response.data = malloc(sizeof(struct FirmwareVersion));
+			response.dataCode = 0;
+
+			write_big_endian(response.data+0, &firmwareVersion.major, sizeof(int));
+			write_big_endian(response.data+sizeof(int), &firmwareVersion.minor, sizeof(int));
+			write_big_endian(response.data+sizeof(int)*2, &firmwareVersion.revision, sizeof(int));
+
+		break;
+
 	}	
 
 	//+1B COBS OVERHEAD initial byte
@@ -173,4 +186,13 @@ void execute_command(cmd_struct command){
 		//wait for usb to transfer...
 	}
 
+
 }
+
+
+void write_big_endian(void* dst_buffer, void* src_buffer, int src_len){
+	for(int i = 0; i < src_len; i++){
+		((uint8_t*) (dst_buffer))[i] = ((uint8_t*) src_buffer)[(src_len-1) - i];
+	}
+}
+
