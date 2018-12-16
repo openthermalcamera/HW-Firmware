@@ -2,14 +2,43 @@
 #include "usbd_cdc_if.h"
 #include "cobs.h"
 
+#include "tim.h"
+
 #include "Version.h"
 
 //globals
 //auto send var
 uint8_t auto_frame_data_sending = 0;
 
-void main_loop(){
+enum IndicatorLed {
+		BLUE_LED, RED_LED
+};
 
+
+//Max dutyCycle value = 1024
+void setPwm(enum IndicatorLed led, uint16_t dutyCycle){
+
+	static TIM_OC_InitTypeDef sConfigOC = {
+			.OCMode = TIM_OCMODE_PWM1,
+			.Pulse = 0,
+			.OCPolarity = TIM_OCPOLARITY_HIGH,
+			.OCFastMode = TIM_OCFAST_DISABLE,
+			.OCNPolarity = TIM_OCNPOLARITY_HIGH,
+			.OCNIdleState = TIM_OCNIDLESTATE_RESET
+	};
+	sConfigOC.Pulse = dutyCycle;
+
+	if(led == BLUE_LED){
+		HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1);
+		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	}else if(led == RED_LED){
+		HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2);
+		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+	}
+
+}
+
+void main_loop(){
 
 	//main loop, never break out
 	while(1){
