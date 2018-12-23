@@ -130,6 +130,7 @@ uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
 
 static volatile int head = 0;
 static volatile int tail = 0;
+static uint8_t receivePacketBuffer[CDC_DATA_FS_MAX_PACKET_SIZE];
 
 /* USER CODE END PRIVATE_VARIABLES */
 
@@ -191,7 +192,8 @@ static int8_t CDC_Init_FS(void)
   /* USER CODE BEGIN 3 */
   /* Set Application Buffers */
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0);
-  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
+  //USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
+  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, receivePacketBuffer);
   return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -296,7 +298,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   */
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
-  /* USER CODE BEGIN 6 */
+	/* USER CODE BEGIN 6 */
 
 	//store in circular buffer
 	for(int x = 0; x < *Len; x++){
@@ -307,10 +309,11 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 		}
 	}
 
-  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
-  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-  return (USBD_OK);
-  /* USER CODE END 6 */
+	USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
+	return (USBD_OK);
+
+	/* USER CODE END 6 */
 }
 
 /**
@@ -353,7 +356,7 @@ int CDC_Available(){
 }
 
 uint8_t CDC_Read(void){
-	uint8_t c = UserRxBufferFS[tail];
+	uint8_t c = *((volatile uint8_t*)&UserRxBufferFS[tail]);
     tail = (tail + 1) % APP_RX_DATA_SIZE;
     return c;
 }

@@ -10,16 +10,22 @@ cmd_struct parse_command(){
 	command.commandCode = CMD_NO_COMMAND;
 	command.dataLength = 0;
 
-	if(CDC_Available() <= 0) return command;
+	//save the value of current available bytes
+	int currAvailable = CDC_Available();
+
+	if(currAvailable <= 0) return command;
 
 	//check if whole message arrived -> {cmd}, 0x00
 	int cmd_length = -1;
 	uint8_t cobs_encoded_buffer[MAX_CMD_DATA_LENGTH];
 
-	for(int i = 0; i < CDC_Available(); i++){
+
+	for(int i = 0; i < currAvailable; i++){
 		uint8_t peak_byte = CDC_Peak(i);
 		if(peak_byte == 0x00){
 			cmd_length = i;
+			//break because only 1 command can be processed at a time
+			break;
 		}
 	}
 
