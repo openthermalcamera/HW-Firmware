@@ -6,7 +6,6 @@
 				<macros>
 					<stringMacro name="REVISION_VERSION" type="VALUE_TEXT" value="6"/>
 					<stringMacro name="MINOR_VERSION" type="VALUE_TEXT" value="1"/>
-					<stringMacro name="ELF2DFUSE_DIR" type="VALUE_TEXT" value="C:\Users\Martin\Documents\Projects\2018\ProjectOpenThermalCamera\elf2dfuse"/>
 					<stringMacro name="MAJOR_VERSION" type="VALUE_TEXT" value="0"/>
 				</macros>
 				<externalSettings/>
