@@ -4,6 +4,7 @@
 #include "protocol.h"
 #include "MLX90640_API.h"
 
+#include <stm32f0xx_hal.h>
 
 #define MLX90640_SLAVE_ADDRESS 0x33
 

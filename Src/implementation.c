@@ -2,13 +2,15 @@
 #include "usbd_cdc_if.h"
 #include "cobs.h"
 
-#include "tim.h"
+#include "main.h"
 
 #include "Version.h"
 
 //globals
 //auto send var
 uint8_t auto_frame_data_sending = 0;
+
+
 
 enum IndicatorLed {
 		BLUE_LED, RED_LED
@@ -18,6 +20,9 @@ enum IndicatorLed {
 //Max dutyCycle value = 1024
 void setPwm(enum IndicatorLed led, uint16_t dutyCycle){
 
+
+	//Does nothing now
+	/*
 	static TIM_OC_InitTypeDef sConfigOC = {
 			.OCMode = TIM_OCMODE_PWM1,
 			.Pulse = 0,
@@ -36,7 +41,34 @@ void setPwm(enum IndicatorLed led, uint16_t dutyCycle){
 		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
 	}
 
+	*/
+
+
 }
+
+
+void dfu_run_bootloader()
+{
+
+	//init BOOT0 pin to output
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	GPIO_InitTypeDef boot0 = {0};
+	boot0.Mode = GPIO_MODE_OUTPUT_PP;
+	boot0.Pin = BOOT0_SEL_Pin;
+	boot0.Pull = GPIO_PULLUP;
+	boot0.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(BOOT0_SEL_GPIO_Port, &boot0);
+
+	//Charge the capacitor
+	HAL_GPIO_WritePin(BOOT0_SEL_GPIO_Port, BOOT0_SEL_Pin, GPIO_PIN_SET);
+
+	//wait for 500ms
+	HAL_Delay(500);
+
+	NVIC_SystemReset();
+}
+
 
 void main_loop(){
 
@@ -186,6 +218,17 @@ void execute_command(cmd_struct command){
 			write_big_endian(response.data+0, &firmwareVersion.major, sizeof(int));
 			write_big_endian(response.data+sizeof(int), &firmwareVersion.minor, sizeof(int));
 			write_big_endian(response.data+sizeof(int)*2, &firmwareVersion.revision, sizeof(int));
+
+		break;
+
+		case CMD_JUMP_TO_BOOTLOADER :
+			dfu_run_bootloader();
+
+			//this should not execute anymore, send back a response, which indicates that device did not boot into DFU
+			response.responseCode = RSP_JUMP_TO_BOOTLOADER;
+			response.dataLength = 0;
+			response.data = NULL;
+			response.dataCode = -1;
 
 		break;
 
