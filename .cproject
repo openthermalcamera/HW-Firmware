@@ -135,7 +135,7 @@
 		<cconfiguration id="com.atollic.truestudio.exe.release.1518366166">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.atollic.truestudio.exe.release.1518366166" moduleId="org.eclipse.cdt.core.settings" name="Release">
 				<macros>
-					<stringMacro name="REVISION_VERSION" type="VALUE_TEXT" value="7"/>
+					<stringMacro name="REVISION_VERSION" type="VALUE_TEXT" value="8"/>
 					<stringMacro name="MINOR_VERSION" type="VALUE_TEXT" value="1"/>
 					<stringMacro name="MAJOR_VERSION" type="VALUE_TEXT" value="0"/>
 				</macros>
@@ -155,7 +155,7 @@
 							<option id="com.atollic.truestudio.toolchain_options.mcu.2108975077" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu" value="STM32F042F6" valueType="string"/>
 							<option id="com.atollic.truestudio.toolchain_options.vendor.1666526415" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor" value="STMicroelectronics" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.atollic.truestudio.exe.release.toolchain.platform.2054752829" isAbstract="false" name="Release platform" superClass="com.atollic.truestudio.exe.release.toolchain.platform"/>
-							<builder buildPath="${workspace_loc:/stm32f042f6}/Release" customBuilderProperties="toolChainpathString=C:\\Program Files (x86)\\Atollic\\TrueSTUDIO for STM32 9.0.1\\ARMTools\\bin|toolChainpathType=1|" id="com.atollic.truestudio.mbs.builder1.1222194476" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="com.atollic.truestudio.mbs.builder1">
+							<builder buildPath="${workspace_loc:/stm32f042f6}/Release" customBuilderProperties="toolChainpathType=1|toolChainpathString=C:\\Program Files (x86)\\Atollic\\TrueSTUDIO for STM32 9.0.1\\ARMTools\\bin|" id="com.atollic.truestudio.mbs.builder1.1222194476" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="com.atollic.truestudio.mbs.builder1">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
 								</outputEntries>
